@@ -57,28 +57,10 @@ public class DB_GUI_Controller implements Initializable {
 
     // just added
     @FXML
-    private MenuItem ChangePic;
-
-    @FXML
-    private MenuItem ClearItem;
-
-    @FXML
-    private MenuItem CopyItem;
+    private MenuItem ChangePic, ClearItem, CopyItem, deleteItem, editItem, logOut, newItem;
 
     @FXML
     private Button addBtn;
-
-    @FXML
-    private MenuItem deleteItem;
-
-    @FXML
-    private MenuItem editItem;
-
-    @FXML
-    private MenuItem logOut;
-
-    @FXML
-    private MenuItem newItem;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
