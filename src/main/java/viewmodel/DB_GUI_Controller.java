@@ -4,6 +4,7 @@ import com.azure.storage.blob.BlobClient;
 import dao.DbConnectivityClass;
 import dao.StorageUploader;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -54,6 +55,31 @@ public class DB_GUI_Controller implements Initializable {
     private final DbConnectivityClass cnUtil = new DbConnectivityClass();
     private final ObservableList<Person> data = cnUtil.getData();
 
+    // just added
+    @FXML
+    private MenuItem ChangePic;
+
+    @FXML
+    private MenuItem ClearItem;
+
+    @FXML
+    private MenuItem CopyItem;
+
+    @FXML
+    private Button addBtn;
+
+    @FXML
+    private MenuItem deleteItem;
+
+    @FXML
+    private MenuItem editItem;
+
+    @FXML
+    private MenuItem logOut;
+
+    @FXML
+    private MenuItem newItem;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         try {
@@ -64,9 +90,58 @@ public class DB_GUI_Controller implements Initializable {
             tv_major.setCellValueFactory(new PropertyValueFactory<>("major"));
             tv_email.setCellValueFactory(new PropertyValueFactory<>("email"));
             tv.setItems(data);
+
+            // Initialize button states
+            initializeButtonStates();
+
+            // Add listener for table view selection
+            tv.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+                boolean recordSelected = newValue != null;
+                editItem.setDisable(!recordSelected);
+                deleteItem.setDisable(!recordSelected);
+            });
+
+            // Add validation listeners for "Add" button
+            addValidationListeners();
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void addValidationListeners() {
+        // Add listeners to validate form fields
+        ChangeListener<String> fieldValidator = (observable, oldValue, newValue) -> {
+            boolean valid = validateFormFields();
+            addBtn.setDisable(!valid); // Enable Add button if valid
+        };
+
+        first_name.textProperty().addListener(fieldValidator);
+        last_name.textProperty().addListener(fieldValidator);
+        department.textProperty().addListener(fieldValidator);
+        major.textProperty().addListener(fieldValidator);
+        email.textProperty().addListener(fieldValidator);
+        imageURL.textProperty().addListener(fieldValidator);
+    }
+
+    private boolean validateFormFields() {
+        // Ensure all fields are non-empty and email is valid
+        return !first_name.getText().isBlank()
+                && !last_name.getText().isBlank()
+                && !department.getText().isBlank()
+                && !major.getText().isBlank()
+                && !email.getText().isBlank()
+                && email.getText().matches("\\S+@\\S+\\.\\S+")
+                && !imageURL.getText().isBlank();
+    }
+
+    private void initializeButtonStates() {
+        // Initially disable Edit and Delete buttons
+        editItem.setDisable(true);
+        deleteItem.setDisable(true);
+
+        // Validate Add button
+        addBtn.setDisable(true);
     }
 
     @FXML
