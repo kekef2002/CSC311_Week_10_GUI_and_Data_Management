@@ -44,7 +44,8 @@ public class DB_GUI_Controller implements Initializable {
     @FXML
     private ProgressBar progressBar;
     @FXML
-    TextField first_name, last_name, department, major, email, imageURL;
+    TextField first_name, last_name, department, email, imageURL;
+
     @FXML
     ImageView img_view;
     @FXML
@@ -111,9 +112,13 @@ public class DB_GUI_Controller implements Initializable {
         first_name.textProperty().addListener(fieldValidator);
         last_name.textProperty().addListener(fieldValidator);
         department.textProperty().addListener(fieldValidator);
-        major.textProperty().addListener(fieldValidator);
+        //major.textProperty().addListener(fieldValidator);
         email.textProperty().addListener(fieldValidator);
         imageURL.textProperty().addListener(fieldValidator);
+        majorDropdown.valueProperty().addListener((observable, oldValue, newValue) -> {
+            boolean valid = validateFormFields();
+            addBtn.setDisable(!valid); // Enable Add button if valid
+        });
     }
 
     private boolean validateFormFields() {
@@ -163,9 +168,10 @@ public class DB_GUI_Controller implements Initializable {
         first_name.setText("");
         last_name.setText("");
         department.setText("");
-        major.setText("");
+//        major.setText("");
         email.setText("");
         imageURL.setText("");
+        majorDropdown.setValue(null); // Reset ComboBox selection
     }
 
     @FXML
@@ -245,7 +251,7 @@ public class DB_GUI_Controller implements Initializable {
         first_name.setText(p.getFirstName());
         last_name.setText(p.getLastName());
         department.setText(p.getDepartment());
-        major.setText(p.getMajor());
+//        major.setText(p.getMajor());
         email.setText(p.getEmail());
         imageURL.setText(p.getImageURL());
     }
