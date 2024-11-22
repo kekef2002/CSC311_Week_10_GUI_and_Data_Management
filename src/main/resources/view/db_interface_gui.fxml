@@ -52,6 +52,12 @@
                                 <MenuItem mnemonicParsing="false" onAction="#displayAbout" styleClass="menu_items" text="About" />
                             </items>
                         </Menu>
+                        <Menu mnemonicParsing="false" styleClass="menu_options" text="Data">
+                            <items>
+                                <MenuItem fx:id="importCSV" mnemonicParsing="false" onAction="#handleImportCSV" text="Import CSV" />
+                                <MenuItem fx:id="exportCSV" mnemonicParsing="false" onAction="#handleExportCSV" text="Export CSV" />
+                            </items>
+                        </Menu>
                     </menus>
                 </MenuBar>
             </top>

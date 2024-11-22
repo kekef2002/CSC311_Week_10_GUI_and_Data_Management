@@ -34,6 +34,9 @@ import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class DB_GUI_Controller implements Initializable {
 
@@ -57,7 +60,7 @@ public class DB_GUI_Controller implements Initializable {
 
     // just added
     @FXML
-    private MenuItem ChangePic, ClearItem, CopyItem, deleteItem, editItem, logOut, newItem;
+    private MenuItem ChangePic, ClearItem, CopyItem, deleteItem, editItem, logOut, newItem, exportCSV, importCSV;
     @FXML
     private Button addBtn;
     @FXML
@@ -300,6 +303,81 @@ public class DB_GUI_Controller implements Initializable {
             MyLogger.makeLog(
                     results.fname + " " + results.lname + " " + results.major);
         });
+    }
+
+    @FXML
+    public void handleImportCSV(ActionEvent actionEvent) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Import CSV File");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        File file = fileChooser.showOpenDialog(menuBar.getScene().getWindow());
+
+        if (file != null) {
+            try {
+                ObservableList<Person> importedData = FXCollections.observableArrayList();
+                List<String> lines = Files.readAllLines(file.toPath());
+
+                for (String line : lines) {
+                    String[] values = line.split(","); // Assuming CSV fields are comma-separated
+
+                    // Validate each row in the CSV file
+                    if (values.length != 6 || Arrays.stream(values).anyMatch(String::isBlank)) {
+                        throw new IllegalArgumentException("Invalid CSV format in row: " + line);
+                    }
+
+                    // Create a Person object from valid data
+                    Person person = new Person(values[0], values[1], values[2], values[3], values[4], values[5]);
+                    importedData.add(person);
+                }
+
+                // Add imported data to table and database
+                for (Person person : importedData) {
+                    cnUtil.insertUser(person);
+                    cnUtil.retrieveId(person);
+                    person.setId(cnUtil.retrieveId(person));
+                }
+                data.addAll(importedData);
+                tv.setItems(data);
+
+                statusBar.setText("CSV file imported successfully.");
+            } catch (IllegalArgumentException e) {
+                statusBar.setText("Error importing CSV: " + e.getMessage());
+            } catch (Exception e) {
+                statusBar.setText("Error importing CSV file.");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @FXML
+    public void handleExportCSV(ActionEvent actionEvent) {
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export CSV File");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        File file = fileChooser.showSaveDialog(menuBar.getScene().getWindow());
+
+        if (file != null) {
+            try {
+                List<String> lines = new ArrayList<>();
+                for (Person person : data) {
+                    lines.add(String.join(",",
+                            person.getFirstName(),
+                            person.getLastName(),
+                            person.getDepartment(),
+                            person.getMajor(),
+                            person.getEmail(),
+                            person.getImageURL()
+                    ));
+                }
+                Files.write(file.toPath(), lines);
+
+                statusBar.setText("CSV file exported successfully.");
+            } catch (Exception e) {
+                statusBar.setText("Error exporting CSV file.");
+                e.printStackTrace();
+            }
+        }
     }
 
     private static enum Major {Business, CSC, CPIS}
