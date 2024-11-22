@@ -67,6 +67,11 @@ public class UserSession {
         return this.privileges;
     }
 
+    // Check if a user is already signed in (optional utility method)
+    public boolean isUserSignedIn() {
+        return userPreferences.get("USERNAME", null) != null;
+    }
+
     // Thread-safe toString method
     @Override
     public synchronized String toString() {
