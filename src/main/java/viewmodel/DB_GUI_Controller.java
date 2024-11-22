@@ -58,9 +58,12 @@ public class DB_GUI_Controller implements Initializable {
     // just added
     @FXML
     private MenuItem ChangePic, ClearItem, CopyItem, deleteItem, editItem, logOut, newItem;
-
     @FXML
     private Button addBtn;
+    @FXML
+    private Label statusBar;
+    @FXML
+    private ComboBox<String> majorDropdown;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -72,6 +75,10 @@ public class DB_GUI_Controller implements Initializable {
             tv_major.setCellValueFactory(new PropertyValueFactory<>("major"));
             tv_email.setCellValueFactory(new PropertyValueFactory<>("email"));
             tv.setItems(data);
+
+            // Populate Major Dropdown
+            ObservableList<String> majors = FXCollections.observableArrayList("CS", "CPIS", "English", "Business");
+            majorDropdown.setItems(majors);
 
             // Initialize button states
             initializeButtonStates();
@@ -107,13 +114,18 @@ public class DB_GUI_Controller implements Initializable {
     }
 
     private boolean validateFormFields() {
+        String nameRegex = "^[A-Z][a-zA-Z\\s-]*$"; // Capitalized names, optional hyphens
+        String departmentRegex = "^[A-Za-z\\s]+$"; // Letters and spaces only
+        String emailRegex = "^[\\w._%+-]+@[\\w.-]+\\.[A-Za-z]{2,6}$"; // Standard email format
+        String imageUrlRegex = "^(https?|file):\\/\\/.*$"; // Valid URL starting with http(s) or file
+
+
         // Ensure all fields are non-empty and email is valid
         return !first_name.getText().isBlank()
                 && !last_name.getText().isBlank()
                 && !department.getText().isBlank()
-                && !major.getText().isBlank()
-                && !email.getText().isBlank()
                 && email.getText().matches("\\S+@\\S+\\.\\S+")
+                && majorDropdown.getValue() != null // Check dropdown selection
                 && !imageURL.getText().isBlank();
     }
 
@@ -128,14 +140,18 @@ public class DB_GUI_Controller implements Initializable {
 
     @FXML
     protected void addNewRecord() {
-
+        try {
             Person p = new Person(first_name.getText(), last_name.getText(), department.getText(),
-                    major.getText(), email.getText(), imageURL.getText());
+                    majorDropdown.getValue(), email.getText(), imageURL.getText());
             cnUtil.insertUser(p);
             cnUtil.retrieveId(p);
             p.setId(cnUtil.retrieveId(p));
             data.add(p);
             clearForm();
+            statusBar.setText("Record added successfully!");
+        } catch (Exception e) {
+            statusBar.setText("Error adding record.");
+        }
 
     }
 
@@ -183,14 +199,19 @@ public class DB_GUI_Controller implements Initializable {
 
     @FXML
     protected void editRecord() {
-        Person p = tv.getSelectionModel().getSelectedItem();
-        int index = data.indexOf(p);
-        Person p2 = new Person(index + 1, first_name.getText(), last_name.getText(), department.getText(),
-                major.getText(), email.getText(),  imageURL.getText());
-        cnUtil.editUser(p.getId(), p2);
-        data.remove(p);
-        data.add(index, p2);
-        tv.getSelectionModel().select(index);
+        try {
+            Person p = tv.getSelectionModel().getSelectedItem();
+            int index = data.indexOf(p);
+            Person p2 = new Person(index + 1, first_name.getText(), last_name.getText(), department.getText(),
+                    majorDropdown.getValue(), email.getText(), imageURL.getText());
+            cnUtil.editUser(p.getId(), p2);
+            data.remove(p);
+            data.add(index, p2);
+            tv.getSelectionModel().select(index);
+            statusBar.setText("Record updated successfully!");
+        } catch (Exception e) {
+            statusBar.setText("Error updating record.");
+        }
     }
 
     @FXML
