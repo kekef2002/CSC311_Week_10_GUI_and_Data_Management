@@ -6,13 +6,17 @@ import java.util.prefs.Preferences;
 
 public class UserSession {
 
-    private static UserSession instance;
+    // Volatile ensures visibility and prevents instruction reordering
+    private static volatile UserSession instance;
 
     private String userName;
-
     private String password;
     private String privileges;
 
+    private final Preferences userPreferences = Preferences.userRoot(); // Initialize directly
+
+
+    // Private constructor to prevent direct instantiation
     private UserSession(String userName, String password, String privileges) {
         this.userName = userName;
         this.password = password;
@@ -22,42 +26,50 @@ public class UserSession {
         userPreferences.put("PASSWORD",password);
         userPreferences.put("PRIVILEGES",privileges);
     }
-
-
-
-    public static UserSession getInstace(String userName,String password, String privileges) {
-        if(instance == null) {
-            instance = new UserSession(userName, password, privileges);
+    // Thread-safe Singleton initialization using Double-Checked Locking
+    public static UserSession getInstance(String userName, String password, String privileges) {
+        if (instance == null) {
+            synchronized (UserSession.class) {
+                if (instance == null) {
+                    instance = new UserSession(userName, password, privileges);
+                }
+            }
         }
         return instance;
     }
 
-    public static UserSession getInstace(String userName,String password) {
-        if(instance == null) {
-            instance = new UserSession(userName, password, "NONE");
-        }
-        return instance;
+    public static UserSession getInstance(String userName, String password) {
+        return getInstance(userName, password, "NONE");
     }
-    public String getUserName() {
+
+
+    // Thread-safe method to clean the user session
+    public synchronized void cleanUserSession() {
+        this.userName = "";
+        this.password = "";
+        this.privileges = "";
+
+        userPreferences.remove("USERNAME");
+        userPreferences.remove("PASSWORD");
+        userPreferences.remove("PRIVILEGES");
+    }
+
+    // Thread-safe getters
+    public synchronized String getUserName() {
         return this.userName;
     }
 
-    public String getPassword() {
+    public synchronized String getPassword() {
         return this.password;
     }
 
-    public String getPrivileges() {
+    public synchronized String getPrivileges() {
         return this.privileges;
     }
 
-    public void cleanUserSession() {
-        this.userName = "";// or null
-        this.password = "";
-        this.privileges = "";// or null
-    }
-
+    // Thread-safe toString method
     @Override
-    public String toString() {
+    public synchronized String toString() {
         return "UserSession{" +
                 "userName='" + this.userName + '\'' +
                 ", privileges=" + this.privileges +
