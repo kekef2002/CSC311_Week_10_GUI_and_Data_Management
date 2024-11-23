@@ -37,7 +37,7 @@
     <children>
         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="6" GridPane.rowIndex="1">
             <children>
-                <Label alignment="CENTER" focusTraversable="false" prefHeight="74.0" prefWidth="1099.0" style="-fx-border-color: BLACK;" text="Sign Up New User Account" textFill="#fcfcfc">
+                <Label alignment="CENTER" focusTraversable="false" prefHeight="74.0" prefWidth="1099.0" style="-fx-border-color: BLACK;" text="Sign Up New User Account" textFill="#1b0000">
                     <font>
                         <Font name="System Bold" size="36.0" />
                     </font>
