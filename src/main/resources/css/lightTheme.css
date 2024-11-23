@@ -46,8 +46,9 @@
     -fx-border-width: 2;
 }
 
-
-
+.v13_13 {
+    -fx-background-color: rgba(30,29,29,1);
+}
 
 .table-view .column-header,
 .table-view .column-header-background .filler {

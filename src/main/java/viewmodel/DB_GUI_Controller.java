@@ -21,6 +21,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.Person;
 import service.MyLogger;
@@ -196,11 +197,19 @@ public class DB_GUI_Controller implements Initializable {
     @FXML
     protected void displayAbout() {
         try {
+            // Load the FXML for the About page
             Parent root = FXMLLoader.load(getClass().getResource("/view/about.fxml"));
-            Stage stage = new Stage();
-            Scene scene = new Scene(root, 600, 500);
-            stage.setScene(scene);
-            stage.showAndWait();
+
+            // Create a new stage for the modal window
+            Stage aboutStage = new Stage();
+            aboutStage.setTitle("About");
+            aboutStage.setScene(new Scene(root, 600, 500));
+
+            // Set modality to block interaction with the parent window
+            aboutStage.initModality(Modality.APPLICATION_MODAL);
+
+            // Show the About page and wait until it is closed
+            aboutStage.showAndWait();
         } catch (Exception e) {
             e.printStackTrace();
         }
