@@ -55,6 +55,16 @@ This project is a **JavaFX-based Database Management System** designed to handle
   - `UserSession.java`: Manages the active user session.
   - `StorageUploader.java`: Manages file uploads to Azure Blob Storage.
   - `MyLogger.java`: Logs important application events and errors.
+- **Images**
+  - `Pictures`
+- **CSS**
+  - `CSS files`
+- **FXML**
+  - `about`
+  - `db_interface_gui`
+  - `login`
+  - `signUp`
+  - `splashscreen`  
 
 ---
 
