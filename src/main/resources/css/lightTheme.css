@@ -1,5 +1,7 @@
 .db_btn {
-    -fx-background-color: #a73;
+    -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, #da9902, #835e02);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 5, 0, 0, 5);
+    -fx-background-insets: 0, 1, 2, 3;
     -fx-cursor: hand;
     -fx-font-family: "Arial";
     -fx-font-size: 15px;
@@ -12,7 +14,7 @@
 }
 
 .left_pane {
-    -fx-background-color: #a73;
+    -fx-background-color: rgba(0, 128, 128, 1);
     -fx-pref-width: 130px;
     -fx-pref-height: 600px;
 }
@@ -32,11 +34,11 @@
 }
 
 .anchor_pane {
-    -fx-background-color: #a73;
+    -fx-background-color: rgba(0, 128, 128, 1);
 }
 
 .text_field_pane {
-    -fx-background-color: #79dc05;
+    -fx-background-color: rgba(0, 128, 128, 1);
 
 }
 
@@ -105,4 +107,8 @@
 	-fx-background-insets: 1, 0, 0;
 	-fx-background-radius: 2em;
 
+}
+
+.v13_14 {
+    -fx-background-color: rgba(30,29,29,1);
 }
