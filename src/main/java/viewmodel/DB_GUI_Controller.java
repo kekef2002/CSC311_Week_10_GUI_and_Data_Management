@@ -526,7 +526,24 @@ public class DB_GUI_Controller implements Initializable {
         File file = (new FileChooser()).showOpenDialog(progressBar.getScene().getWindow());
         if (file != null) {
             Task<Void> uploadTask = createUploadTask(file, progressBar);
+
+            // Bind the progress property of the ProgressBar to the Task's progress
             progressBar.progressProperty().bind(uploadTask.progressProperty());
+
+            // Set failure handler for the Task
+            uploadTask.setOnFailed(event -> {
+                progressBar.progressProperty().unbind();
+                progressBar.setProgress(0);
+                statusBar.setText("Upload failed.");
+            });
+
+            // Optional: Set a success handler to update the status bar
+            uploadTask.setOnSucceeded(event -> {
+                progressBar.progressProperty().unbind();
+                statusBar.setText("Upload completed successfully!");
+            });
+
+            // Start the upload task in a new thread
             new Thread(uploadTask).start();
         }
     }
