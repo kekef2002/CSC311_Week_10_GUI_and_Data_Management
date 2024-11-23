@@ -16,6 +16,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -26,7 +27,6 @@ import javafx.stage.Stage;
 import model.Person;
 import service.MyLogger;
 import javafx.scene.control.ProgressBar;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.OutputStream;
@@ -38,6 +38,12 @@ import java.util.ResourceBundle;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import org.apache.pdfbox.pdmodel.*;
+import org.apache.pdfbox.pdmodel.common.*;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import java.io.IOException;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DB_GUI_Controller implements Initializable {
 
@@ -62,7 +68,7 @@ public class DB_GUI_Controller implements Initializable {
 
     // just added
     @FXML
-    private MenuItem ChangePic, ClearItem, CopyItem, deleteItem, editItem, logOut, newItem, exportCSV, importCSV;
+    private MenuItem ChangePic, ClearItem, CopyItem, deleteItem, editItem, logOut, newItem, exportCSV, importCSV, reportMenuItem;
     @FXML
     private Button addBtn;
     @FXML
@@ -73,34 +79,89 @@ public class DB_GUI_Controller implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         try {
+            // Set up TableView columns
             tv_id.setCellValueFactory(new PropertyValueFactory<>("id"));
             tv_fn.setCellValueFactory(new PropertyValueFactory<>("firstName"));
             tv_ln.setCellValueFactory(new PropertyValueFactory<>("lastName"));
             tv_department.setCellValueFactory(new PropertyValueFactory<>("department"));
             tv_major.setCellValueFactory(new PropertyValueFactory<>("major"));
             tv_email.setCellValueFactory(new PropertyValueFactory<>("email"));
+
+            // Set items for the TableView
             tv.setItems(data);
 
-            // Populate Major Dropdown
-            ObservableList<String> majors = FXCollections.observableArrayList("CS", "CPIS", "English", "Business");
-            majorDropdown.setItems(majors);
+            // Enable editing
+            tv.setEditable(true);
+
+            // Add editable columns
+            addEditableColumns();
+
+            // Handle clicks for adding a new row
+            handleAddRowOnEmptyClick();
 
             // Initialize button states
             initializeButtonStates();
 
-            // Add listener for table view selection
-            tv.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-                boolean recordSelected = newValue != null;
-                editItem.setDisable(!recordSelected);
-                deleteItem.setDisable(!recordSelected);
-            });
-
-            // Add validation listeners for "Add" button
-            addValidationListeners();
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    // Add editable columns with inline editing functionality
+    private void addEditableColumns() {
+        tv_fn.setCellFactory(TextFieldTableCell.forTableColumn());
+        tv_fn.setOnEditCommit(event -> {
+            Person person = event.getRowValue();
+            person.setFirstName(event.getNewValue());
+            cnUtil.updateUser(person); // Update in the database
+        });
+
+        tv_ln.setCellFactory(TextFieldTableCell.forTableColumn());
+        tv_ln.setOnEditCommit(event -> {
+            Person person = event.getRowValue();
+            person.setLastName(event.getNewValue());
+            cnUtil.updateUser(person); // Update in the database
+        });
+
+        tv_department.setCellFactory(TextFieldTableCell.forTableColumn());
+        tv_department.setOnEditCommit(event -> {
+            Person person = event.getRowValue();
+            person.setDepartment(event.getNewValue());
+            cnUtil.updateUser(person); // Update in the database
+        });
+
+        tv_major.setCellFactory(TextFieldTableCell.forTableColumn());
+        tv_major.setOnEditCommit(event -> {
+            Person person = event.getRowValue();
+            person.setMajor(event.getNewValue());
+            cnUtil.updateUser(person); // Update in the database
+        });
+
+        tv_email.setCellFactory(TextFieldTableCell.forTableColumn());
+        tv_email.setOnEditCommit(event -> {
+            Person person = event.getRowValue();
+            person.setEmail(event.getNewValue());
+            cnUtil.updateUser(person); // Update in the database
+        });
+    }
+
+    // Detect clicks on an empty row and add a new row
+    private void handleAddRowOnEmptyClick() {
+        tv.setOnMouseClicked(event -> {
+            // Check if the user clicked on the empty area
+            if (tv.getSelectionModel().isEmpty()) {
+                addNewEmptyRow();
+            }
+        });
+    }
+
+    // Add a new empty row
+    private void addNewEmptyRow() {
+        Person newPerson = new Person("New", "User", "", "", "", "");
+        cnUtil.insertUser(newPerson); // Insert into the database
+        newPerson.setId(cnUtil.retrieveId(newPerson)); // Retrieve the ID from the database
+        data.add(newPerson); // Add to the TableView
+        tv.getSelectionModel().select(newPerson); // Select the newly added row
     }
 
     private void addValidationListeners() {
@@ -395,6 +456,57 @@ public class DB_GUI_Controller implements Initializable {
         }
     }
 
+    @FXML
+    public void generateReport(ActionEvent actionEvent) {
+        // Count the number of students by major
+        Map<String, Long> majorCounts = data.stream()
+                .collect(Collectors.groupingBy(Person::getMajor, Collectors.counting()));
+
+        // Generate the PDF
+        try (PDDocument document = new PDDocument()) {
+            PDPage page = new PDPage();
+            document.addPage(page);
+
+            // Create a content stream
+            PDPageContentStream contentStream = new PDPageContentStream(document, page);
+
+            // Write to the PDF
+            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 16);
+            contentStream.beginText();
+            contentStream.setLeading(14.5f);
+            contentStream.newLineAtOffset(50, 750);
+
+            contentStream.showText("Report: Number of Students by Major");
+            contentStream.newLine();
+            contentStream.newLine();
+
+            // Add the data
+            contentStream.setFont(PDType1Font.HELVETICA, 12);
+            for (Map.Entry<String, Long> entry : majorCounts.entrySet()) {
+                contentStream.showText(entry.getKey() + ": " + entry.getValue() + " students");
+                contentStream.newLine();
+            }
+
+            contentStream.endText();
+            contentStream.close();
+
+            // Save the PDF to a file
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save PDF Report");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+            File file = fileChooser.showSaveDialog(menuBar.getScene().getWindow());
+
+            if (file != null) {
+                document.save(file);
+                statusBar.setText("Report saved successfully to: " + file.getAbsolutePath());
+            }
+
+        } catch (IOException e) {
+            statusBar.setText("Error generating the report.");
+            e.printStackTrace();
+        }
+    }
+
     private static enum Major {Business, CSC, CPIS}
 
     private static class Results {
@@ -446,6 +558,4 @@ public class DB_GUI_Controller implements Initializable {
             }
         };
     }
-
-
 }

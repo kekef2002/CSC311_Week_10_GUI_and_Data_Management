@@ -231,4 +231,24 @@ public class DbConnectivityClass {
             lg.makeLog(String.valueOf(id));
             return id;
         }
+
+    public void updateUser(Person person) {
+        connectToDatabase();
+        try {
+            Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+            String sql = "UPDATE users SET first_name=?, last_name=?, department=?, major=?, email=?, imageURL=? WHERE id=?";
+            PreparedStatement preparedStatement = conn.prepareStatement(sql);
+            preparedStatement.setString(1, person.getFirstName());
+            preparedStatement.setString(2, person.getLastName());
+            preparedStatement.setString(3, person.getDepartment());
+            preparedStatement.setString(4, person.getMajor());
+            preparedStatement.setString(5, person.getEmail());
+            preparedStatement.setString(6, person.getImageURL());
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+            conn.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
+}

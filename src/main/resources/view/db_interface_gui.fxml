@@ -27,6 +27,7 @@
                         <Menu mnemonicParsing="false" styleClass="menu_options" text="File">
                             <items>
                                 <MenuItem fx:id="newItem" mnemonicParsing="false" onAction="#addRecord" styleClass="menu_items" text="New" />
+                        <MenuItem fx:id="reportMenuItem" mnemonicParsing="false" onAction="#generateReport" text="Generate Report" />
                                 <MenuItem fx:id="ChangePic" mnemonicParsing="false" onAction="#showImage" styleClass="menu_items" text="Change Pic" />
                                 <MenuItem fx:id="logOut" mnemonicParsing="false" onAction="#logOut" styleClass="menu_items" text="Log out" />
                                 <MenuItem mnemonicParsing="false" onAction="#closeApplication" styleClass="menu_items" text="Exit Program" />
@@ -79,7 +80,8 @@
             <bottom>
                 <HBox prefHeight="30.0" prefWidth="892.0" styleClass="admin_section" BorderPane.alignment="CENTER">
                     <children>
-                        <ProgressBar fx:id="progressBar" prefHeight="30.0" prefWidth="913.0" progress="0.0" />
+                        <ProgressBar fx:id="progressBar" prefHeight="30.0" prefWidth="451.0" progress="0.0" />
+                  <Label fx:id="statusBar" prefHeight="30.0" prefWidth="451.0" text="Status Bar" />
                     </children></HBox>
             </bottom>
             <right>
@@ -153,6 +155,9 @@
                         <TableColumn fx:id="tv_major" prefWidth="84.0" styleClass="table_columns" text="Major" />
                         <TableColumn fx:id="tv_email" prefWidth="111.0" styleClass="table_columns" text="Email" />
                     </columns>
+                    <placeholder>
+                        <Label text="Click here to add a new record" />
+                    </placeholder>
                 </TableView>
             </center>
             <padding>

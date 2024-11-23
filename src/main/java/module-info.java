@@ -4,6 +4,7 @@ module com.example.csc311_db_ui_semesterlongproject {
     requires java.sql;
     requires java.prefs;
     requires com.azure.storage.blob;
+    requires org.apache.pdfbox;
 
 
     opens viewmodel;
